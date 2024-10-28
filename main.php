@@ -7,27 +7,22 @@ function getData($conn) {
     $form_edu = isset($_GET['form_edu']) ? $_GET['form_edu'] : '';
     $course = isset($_GET['course']) ? $_GET['course'] : '';
     $groupe = isset($_GET['groupe']) ? $_GET['groupe'] : '';
-        $fields = isset($_GET['inc']) =='all' ? '*' : '*';
-        $query = "SELECT $fields FROM schedule";
+        $query = "SELECT * FROM schedule";
 
 //Получение всех данных из get запроса
         if ($stmt = $conn->prepare($query)) {
             // Выполнение запроса
             $stmt->execute();
 
-            // Получение результатов
             $result = $stmt->get_result();
 
-            // Формирование массива с результатами
             $data = array();
             while ($row = $result->fetch_assoc()) {
                 $data[] = $row;
             }
 
-            // Возвращение данных в формате JSON
             echo json_encode($data,JSON_UNESCAPED_UNICODE);
 
-            // Закрытие выражения
             $stmt->close();
         }
 }
@@ -37,50 +32,46 @@ function getForAtrib($conn) {
     $form_edu = isset($_GET['form_edu']) ? $_GET['form_edu'] : '';
     $course = isset($_GET['course']) ? $_GET['course'] : '';
     $groupe = isset($_GET['groupe']) ? $_GET['groupe'] : '';
-    $fields = isset($_GET['inc']);
-    echo $fields;
+    $fields = $_GET['inc'];
     $query = "SELECT DISTINCT $fields FROM schedule";
-
-//Получение всех данных из get запроса
     if ($stmt = $conn->prepare($query)) {
-        // Выполнение запроса
         $stmt->execute();
 
-        // Получение результатов
         $result = $stmt->get_result();
 
-        // Формирование массива с результатами
         $data = array();
         while ($row = $result->fetch_assoc()) {
             $data[] = $row;
         }
-
-        // Возвращение данных в формате JSON
-        
-
-        // Закрытие выражения
+        echo json_encode($data,JSON_UNESCAPED_UNICODE);
         $stmt->close();
     }
 
 
-// Закрытие соединения
-    $conn->close();
 }
 
 function main()
 {
     $conn = get_connection();
     if ($conn) {
-        $fields = isset($_GET['inc']);
+        $fields = $_GET['inc'];
         switch ($fields){
             case 'all':
                 getData($conn);
                 break;
-            case 'faculty' || 'form_edu' || 'course':
+            case 'faculty':
                 getForAtrib($conn);
                 break;
+            case 'form_edu':
+                getForAtrib($conn);
+                break;
+            case 'course':
+                getForAtrib($conn);
+                break;
+            default:
+                // ... код,  если  $fields  не совпадает ни с одним case ...
+                break;
         }
-        getData($conn);
     } else {
         echo "Ошибка при подключении к базе данных.";
     }
